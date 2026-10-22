@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuaca Jakarta — Praktikum API</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="tag">PRAKTIKUM / DATA API</span>
+    <h1>Cuaca<br><span id="city-name">Jakarta</span></h1>
+    <div class="sub">
+      <span id="sub-coords"><i class="bi bi-geo-alt-fill"></i> -6.2, 106.8</span>
+      <span><i class="bi bi-cloud-sun-fill"></i> Open-Meteo API</span>
+      <span><i class="bi bi-thermometer-half"></i> temperature_2m / per jam</span>
+    </div>
+  </header>
+
+  <div id="status">
+    <i class="bi bi-arrow-repeat"></i>
+    <span id="status-text">Mengambil data dari API...</span>
+    <button id="retry" type="button"><i class="bi bi-arrow-clockwise"></i> MUAT ULANG</button>
+  </div>
+
+  <section id="filters" hidden>
+    <h2><i class="bi bi-funnel-fill"></i> Filter Data
+      <span class="fres" id="fres">0 jam</span>
+    </h2>
+    <div class="fgroup" id="fg-kota">
+      <span class="flabel"><i class="bi bi-geo-alt"></i> Kota</span>
+      <input id="city-q" type="text" placeholder="ketik nama kota (min. 3 karakter)" autocomplete="off">
+      <span class="fhint"><i class="bi bi-search"></i> cari otomatis / Enter</span>
+      <div id="city-res"></div>
+    </div>
+    <div class="fgroup" id="fg-hari">
+      <span class="flabel"><i class="bi bi-calendar3"></i> Hari</span>
+      <!-- chip hari dibuat lewat JS -->
+    </div>
+    <div class="fgroup" id="fg-waktu">
+      <span class="flabel"><i class="bi bi-clock"></i> Waktu</span>
+      <button class="chip on" type="button" data-time="all">Semua</button>
+      <button class="chip" type="button" data-time="0">Dini hari 00-05</button>
+      <button class="chip" type="button" data-time="1">Pagi 06-11</button>
+      <button class="chip" type="button" data-time="2">Siang 12-17</button>
+      <button class="chip" type="button" data-time="3">Malam 18-23</button>
+    </div>
+    <div class="fgroup" id="fg-suhu">
+      <span class="flabel"><i class="bi bi-thermometer"></i> Suhu</span>
+      <button class="chip on" type="button" data-temp="all">Semua</button>
+      <button class="chip" type="button" data-temp="hot">Hangat (di atas rata-rata)</button>
+      <button class="chip" type="button" data-temp="cool">Sejuk (di bawah rata-rata)</button>
+    </div>
+  </section>
+
+  <section class="stats" id="stats" hidden>
+    <div class="stat s-now">
+      <div class="lbl"><i class="bi bi-thermometer-high"></i> Sekarang</div>
+      <div class="val" id="v-now">--<small>&deg;C</small></div>
+    </div>
+    <div class="stat s-min">
+      <div class="lbl"><i class="bi bi-thermometer-low"></i> Terendah</div>
+      <div class="val" id="v-min">--<small>&deg;C</small></div>
+    </div>
+    <div class="stat s-max">
+      <div class="lbl"><i class="bi bi-thermometer-high"></i> Tertinggi</div>
+      <div class="val" id="v-max">--<small>&deg;C</small></div>
+    </div>
+    <div class="stat s-avg">
+      <div class="lbl"><i class="bi bi-graph-down"></i> Rata-rata</div>
+      <div class="val" id="v-avg">--<small>&deg;C</small></div>
+    </div>
+  </section>
+
+  <section class="chart-box">
+    <h2><i class="bi bi-bar-chart-line-fill"></i> Grafik Suhu per Jam
+      <span class="hint">arahkan kursor ke batang</span>
+    </h2>
+    <div class="chart-flex">
+      <div class="yaxis" id="yaxis"></div>
+      <div class="chart-main">
+        <div id="chart"></div>
+        <div id="xaxis"></div>
+      </div>
+    </div>
+    <div class="chart-legend">
+      <span><i style="background:var(--hitam)"></i>Suhu</span>
+      <span><i style="background:var(--merah)"></i>Jam saat ini</span>
+      <span><i style="background:var(--biru)"></i>Saat di-hover</span>
+    </div>
+  </section>
+
+  <section class="tbl-box">
+    <h2><i class="bi bi-table"></i> Tabel Data
+      <span class="count" id="count">0 baris</span>
+    </h2>
+    <div class="tbl-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:60%"><i class="bi bi-clock-fill"></i> time (waktu pengukuran)</th>
+            <th class="th-temp"><i class="bi bi-thermometer-half"></i> temperature_2m (suhu per jam dalam &deg;C)</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <strong><i class="bi bi-database-fill"></i> SUMBER DATA</strong><br>
+    Data prakiraan cuaca diambil langsung dari API online Open-Meteo saat halaman dibuka
+    (dengan parameter tambahan <b>timezone=auto</b> agar waktu sesuai zona kota terpilih).<br>
+    <span id="foot-note">Lokasi saat ini: Jakarta (-6.20, 106.80) — sesuai tugas.</span>
+    <span class="src">https://api.open-meteo.com/v1/forecast?latitude=-6.2&amp;longitude=106.8&amp;hourly=temperature_2m</span>
+  </footer>
+
+</div>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
